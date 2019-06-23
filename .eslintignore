@@ -1,0 +1,6 @@
+# EsLint Ignore
+/build/Release/
+/config/*.js
+/migrations/*.js
+/seeders/*.js
+/test/*.js
