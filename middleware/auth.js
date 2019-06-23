@@ -5,7 +5,7 @@ const {User} = model;
 module.exports = {
 	isAuth: (req,res,next) => {
 		try {
-			const {token} = req.headers;
+			const {token} = req;
 			var decoded = jwt.verify(token, process.env.SECRET);
 			req.user = decoded;
 			next();

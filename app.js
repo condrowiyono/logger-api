@@ -3,9 +3,11 @@ import bodyParser from 'body-parser' ;
 import 'dotenv/config';
 import routes from './routes/index';
 import cors from 'cors';
+import bearerToken from 'express-bearer-token';
 
 const app = express();
 
+app.use(bearerToken());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true }));
 app.use(cors());
