@@ -38,7 +38,7 @@ module.exports = {
 		var {limit} = req.query;
 		//Prepare Pagination
 		if (!limit) {
-			limit = 100;
+			limit = 16;
 		}
 		var paginate = Pagination.pagination(limit,0,page);
 		

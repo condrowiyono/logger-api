@@ -4,7 +4,7 @@
   "description": "Aplikasi monitoring dan pencatat log",
   "main": "app.js",
   "scripts": {
-    "clean": "rm -rf build/Release/*",
+    "prebuild": "rm -rf build/Release/*",
     "build": "./node_modules/.bin/babel . -d build/Release --ignore node_modules",
     "start": "node build/Release/app.js",
     "serve": "npm run prebuild && npm run build && npm run start",
