@@ -2,6 +2,7 @@ import model from '../models';
 import sequelize from 'sequelize';
 import Pagination from './Helper/Pagination';
 import Response from './Helper/Response';
+import crypto from 'crypto';
 
 const {Op} = sequelize;
 const {Facility, Subfacility, Equipment} = model;
@@ -11,7 +12,7 @@ module.exports = {
 		const {page,name} = req.query;
 		var {limit} = req.query;
 		if (!limit) {
-			limit = 16;
+			limit = 2;
 		}
 		//Prepare Pagination
 		var paginate = Pagination.pagination(limit,0,page);
@@ -77,6 +78,29 @@ module.exports = {
 			});
 		});
 	},
+	getEquipmentByQrcode: (req, res) => {
+		const {qrcode} = req.params;
+		Equipment.findOne(
+			{
+				where: { qrcode },
+				include: ['facility','subfacility']
+			}).then((eq) => {
+			if (eq === null) {
+				res.status(404).json({
+					message: `Eq Not Found`,
+				});
+			} else {
+				res.status(200).json({
+					message: `Get an Eq with qr ${qrcode}`,
+					data: eq
+				});
+			}
+		}).catch((err) => {
+			res.status(500).json({
+				message: err.message
+			});
+		});
+	},
 	
 	createEquipment: (req, res) => {
 		const {facility_id, subfacility_id, name, location, attributes, brand, quantity, year_installed, desc} = req.body;
@@ -91,6 +115,7 @@ module.exports = {
 		    quantity: quantity,
 		    yearInstalled: year_installed,
 		    desc: desc,
+		    qrcode: crypto.randomBytes(5).toString('hex').toUpperCase(),
 		}).then((eq) => {
 			Equipment.findByPk(eq.id).then((eq)=> {
 				res.status(201).json({
@@ -136,6 +161,27 @@ module.exports = {
 			    quantity: quantity,
 			    yearInstalled: year_installed,
 			    desc: desc,
+			}).then((eq) => {
+				Equipment.findByPk(eq.id).then((eq)=> {
+					res.status(200).json({
+						message: `Success Updated a Eq`,
+						data: eq
+					});
+				});
+			});
+		}).catch((err) => {
+			res.status(404).json({
+				message: err.message
+			});
+		});
+	},
+	generateQrcode: (req, res) => {
+		const {id} = req.params;
+        
+		Equipment.findByPk(id).then((eq) => {
+			eq.update({
+				qrcode: crypto.randomBytes(5).toString('hex').toUpperCase(),
+
 			}).then((eq) => {
 				Equipment.findByPk(eq.id).then((eq)=> {
 					res.status(200).json({

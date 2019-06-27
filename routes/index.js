@@ -5,6 +5,7 @@ import users from './users';
 import facilities from './facilities';
 import subfacilities from './subfacilities';
 import equipments from './equipments';
+import logs from './logs';
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use('/users', isAuth, users);
 router.use('/facilities', isAuth, facilities);
 router.use('/subfacilities', isAuth, subfacilities);
 router.use('/equipments', isAuth, equipments);
+router.use('/logs', isAuth, logs);
 
 export default router;

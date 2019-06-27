@@ -199,7 +199,7 @@ module.exports = {
 					res.status(200).json(Response.writeResponse(`Password Tidak Sama`,null,null,"Password did not match"));
 				}
 			} else {
-				res.status(200).json(Response.writeResponse(`Password Salah`,null,null,"Password did not match"));
+				res.status(200).json(Response.writeResponse(`Password Salah`,null,null,"404"));
 			}
 		}).catch((err) => {
 			res.status(404).json(Response.writeResponse(`User Not Found`,null,null,err.message));
