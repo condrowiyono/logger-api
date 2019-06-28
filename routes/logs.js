@@ -1,11 +1,12 @@
 import express from 'express';
-import { getLogs, getLogsCSV, getLog, createLog, deleteLog, updateLog, uploadLogImage, deleteLogImage } from '../controllers/LogController';
+import { getLogs, getLogsCSV, getLogsMonthly, getLog, createLog, deleteLog, updateLog, uploadLogImage, deleteLogImage } from '../controllers/LogController';
 import uploadHelper from '../controllers/Helper/Upload';
 
 const router = express.Router();
 
 router.get('/', getLogs);
 router.get('/download-csv', getLogsCSV);
+router.get('/monthly', getLogsMonthly);
 router.get('/:id', getLog);
 router.post('/', createLog);
 router.delete('/:id',deleteLog);

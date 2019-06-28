@@ -15,7 +15,7 @@ module.exports = {
 		var {limit} = req.query;
 		
 		if (!limit) {
-			limit = 2;
+			limit = 100;
 		}
 		//Prepare Pagination
 		var paginate = Pagination.pagination(limit,0,page);
@@ -61,7 +61,46 @@ module.exports = {
 			});
 		});
 	},
+	getLogsMonthly : (req,res) => {
+		let {month,year} = req.query;
+		let date_from, date_to;
+
+		month = parseInt(month,10);
+		year = parseInt(year,10);
+
+
+		if (month==12) {
+			date_from = `${year}-${month}-01`;
+		 	date_to = `${year+1}-01-01`;
+		} else {
+		 date_from = `${year}-${month}-01`;
+		 date_to = `${year}-${month+1}-01`;
+		}
+
+		var where = {};
+		if (date_from && date_to ) {
+			where.date = { [Op.between]: [date_from, date_to] };
+		}
+		var order=[];
+		Log.findAll({
+			order,
+			raw:true,
+		}).then((eq)=> {
+			res.status(200).json({
+				message: `Search for Logs by Month`,
+				data: eq
+			});
+		}).catch((err)=> {
+			res.status(500).json({
+				message: err.message
+			});
+		});
+
+		order.push(['createdAt', 'DESC' ]);
+	},
+
 	getLogsCSV: (req,res) => {
+		const {page,name, date_from, date_to} = req.query;
 		const fields = [
 			{
 			  label: 'Nama Peralatan',
@@ -101,9 +140,13 @@ module.exports = {
 		var order=[];
 
 		order.push(['createdAt', 'DESC' ]);
-
+		var where = {};
+		if (date_from && date_to ) {
+			where.date = { [Op.between]: [date_from, date_to] };
+		}
 		Log.findAll({
 			order,
+			where,
 			raw:true,
 			include: ['user','equipment'],
 		}).then((eq)=> {
