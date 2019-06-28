@@ -3,6 +3,7 @@ import sequelize from 'sequelize';
 import Pagination from './Helper/Pagination';
 import Response from './Helper/Response';
 import crypto from 'crypto';
+import {Parser} from 'json2csv';
 
 const {Op} = sequelize;
 const {Facility, Subfacility, Equipment} = model;
@@ -53,6 +54,54 @@ module.exports = {
 				message: err.message
 			});
 		});
+		
+	},
+	getEquipmentsCSV: (req, res)=> {
+		const fields = [
+			{
+			  label: 'Nama Peralatan',
+			  value: 'name'
+			},
+			{
+			  label: 'Lokasi',
+			  value: 'location'
+			},
+			{
+			  label: 'Tipe / Nomor Seri',
+			  value: 'attributes'
+			},
+			{
+			  label: 'Merek',
+			  value: 'brand'
+			},
+			{
+			  label: 'Jumlah',
+			  value: 'quantity'
+			},
+			{
+			  label: 'Tahun Instalasi',
+			  value: 'yearInstalled'
+			},
+			{
+			  label: 'Keterangan',
+			  value: 'desc'
+			}
+		];
+
+		Equipment.findAll({
+			attributes: ['name','location', 'attributes','brand', 'quantity', 'yearInstalled', 'desc'],
+			raw:true,
+		}).then((eq)=> {
+			const json2csvParser = new Parser({ fields });
+			const csv = json2csvParser.parse(eq);
+			res.attachment('peralatan.csv');
+			res.status(200).send(csv);
+		}).catch((err)=> {
+			res.status(500).json({
+				message: err.message
+			});
+		});
+		 
 		
 	},
 	getEquipment: (req, res) => {

@@ -4,13 +4,14 @@ import Pagination from './Helper/Pagination';
 import Response from './Helper/Response';
 import crypto from 'crypto';
 import fs from 'fs';
+import {Parser} from 'json2csv';
 
 const {Op} = sequelize;
 const {Log, Equipment, User,LogImage} = model;
 
 module.exports = {
 	getLogs: (req,res) => {
-		const {page,name} = req.query;
+		const {page,name, date_from, date_to} = req.query;
 		var {limit} = req.query;
 		
 		if (!limit) {
@@ -25,9 +26,12 @@ module.exports = {
 
 		//Prepare Filtering
 		var where = {};
-		if (name) {
-			where.name = { [Op.like] : `%${name}%` };
+		if (date_from && date_to ) {
+			where.date = { [Op.between]: [date_from, date_to] };
 		}
+		var order=[];
+
+		order.push(['createdAt', 'DESC' ]);
 
 		Log.findAndCountAll({
 			where,
@@ -36,6 +40,7 @@ module.exports = {
 			paginate.offset = paginate.limit * (paginate.page-1);
 			Log.findAll({
 				where,
+				order,
 				include: ['user','equipment'],
 				limit: paginate.limit,
 				offset: paginate.offset
@@ -51,6 +56,62 @@ module.exports = {
 				});
 			});
 		}).catch((err) => {
+			res.status(500).json({
+				message: err.message
+			});
+		});
+	},
+	getLogsCSV: (req,res) => {
+		const fields = [
+			{
+			  label: 'Nama Peralatan',
+			  value: 'equipment.name'
+			},
+			{
+			  label: 'Nama Petugas',
+			  value: 'user.name'
+			},
+			{
+			  label: 'Tanggal',
+			  value: 'date'
+			},
+			{
+			  label: 'Shift',
+			  value: 'shift'
+			},
+			{
+			  label: 'Jam',
+			  value: 'time'
+			},
+			{
+			  label: 'Uraian Pekerjaan',
+			  value: 'jobDesc'
+			},
+			{
+			  label: 'Tindak Lanjut',
+			  value: 'followUp'
+			},
+			{
+			  label: 'Keterangan',
+			  value: 'desc'
+			}
+			
+		];
+
+		var order=[];
+
+		order.push(['createdAt', 'DESC' ]);
+
+		Log.findAll({
+			order,
+			raw:true,
+			include: ['user','equipment'],
+		}).then((eq)=> {
+			const json2csvParser = new Parser({ fields });
+			const csv = json2csvParser.parse(eq);
+			res.attachment('logs.csv');
+			res.status(200).send(csv);
+		}).catch((err)=> {
 			res.status(500).json({
 				message: err.message
 			});
